@@ -1,0 +1,207 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [],
+   "source": [
+    "import pandas as pd"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "metadata": {
+    "collapsed": false,
+    "scrolled": true
+   },
+   "outputs": [],
+   "source": [
+    "from keras.models import Sequential\n",
+    "from keras.utils import np_utils\n",
+    "from keras.layers.core import Dense, Activation, Dropout\n",
+    "\n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "\n",
+    "# Read data\n",
+    "train = pd.read_csv('./123/train.csv')\n",
+    "labels = train.ix[:,0].values.astype('int32')\n",
+    "X_train = (train.ix[:,1:].values).astype('float32')\n",
+    "X_test = (pd.read_csv('./123/test.csv').values).astype('float32')\n",
+    "\n",
+    "# convert list of labels to binary class matrix\n",
+    "y_train = np_utils.to_categorical(labels)\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[[ 0.  1.  0. ...,  0.  0.  0.]\n",
+      " [ 1.  0.  0. ...,  0.  0.  0.]\n",
+      " [ 0.  1.  0. ...,  0.  0.  0.]\n",
+      " ..., \n",
+      " [ 0.  0.  0. ...,  1.  0.  0.]\n",
+      " [ 0.  0.  0. ...,  0.  0.  0.]\n",
+      " [ 0.  0.  0. ...,  0.  0.  1.]]\n",
+      "[1 0 1 ..., 7 6 9]\n"
+     ]
+    }
+   ],
+   "source": [
+    "print (y_train)\n",
+    "print (labels)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "(784, 10)"
+      ]
+     },
+     "execution_count": 14,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "# pre-processing: divide by max and substract mean\n",
+    "scale = np.max(X_train)\n",
+    "X_train /= scale\n",
+    "X_test /= scale\n",
+    "\n",
+    "mean = np.std(X_train)\n",
+    "X_train -= mean\n",
+    "X_test -= mean\n",
+    "\n",
+    "input_dim = X_train.shape[1]\n",
+    "nb_classes = y_train.shape[1]\n",
+    "input_dim,nb_classes"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": [
+    "\n",
+    "# Here's a Deep Dumb MLP (DDMLP)\n",
+    "model = Sequential()\n",
+    "model.add(Dense(128, input_dim=input_dim))\n",
+    "model.add(Activation('relu'))\n",
+    "model.add(Dropout(0.15))\n",
+    "model.add(Dense(128))\n",
+    "model.add(Activation('relu'))\n",
+    "model.add(Dropout(0.15))\n",
+    "model.add(Dense(nb_classes))\n",
+    "model.add(Activation('softmax'))\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "metadata": {
+    "collapsed": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Training...\n",
+      "Train on 37800 samples, validate on 4200 samples\n",
+      "Epoch 1/10\n",
+      "9s - loss: 8.3999 - acc: 0.4741 - val_loss: 5.2726 - val_acc: 0.6698\n",
+      "Epoch 2/10\n",
+      "9s - loss: 5.0639 - acc: 0.6823 - val_loss: 4.0384 - val_acc: 0.7474\n",
+      "Epoch 3/10\n",
+      "9s - loss: 4.5632 - acc: 0.7148 - val_loss: 4.1374 - val_acc: 0.7410\n",
+      "Epoch 4/10\n",
+      "10s - loss: 4.4746 - acc: 0.7204 - val_loss: 4.0305 - val_acc: 0.7479\n",
+      "Epoch 5/10\n",
+      "9s - loss: 4.4465 - acc: 0.7221 - val_loss: 4.5065 - val_acc: 0.7181\n",
+      "Epoch 6/10\n",
+      "9s - loss: 4.3754 - acc: 0.7269 - val_loss: 4.1556 - val_acc: 0.7410\n",
+      "Epoch 7/10\n",
+      "9s - loss: 4.2819 - acc: 0.7329 - val_loss: 3.8853 - val_acc: 0.7583\n",
+      "Epoch 8/10\n",
+      "10s - loss: 4.1450 - acc: 0.7417 - val_loss: 3.6741 - val_acc: 0.7712\n",
+      "Epoch 9/10\n",
+      "9s - loss: 4.0429 - acc: 0.7479 - val_loss: 3.7196 - val_acc: 0.7686\n",
+      "Epoch 10/10\n",
+      "9s - loss: 4.0336 - acc: 0.7484 - val_loss: 3.5753 - val_acc: 0.7767\n",
+      "Generating test predictions...\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# we'll use categorical xent for the loss, and RMSprop as the optimizer\n",
+    "model.compile(loss='categorical_crossentropy', optimizer='rmsprop')\n",
+    "\n",
+    "print(\"Training...\")\n",
+    "model.fit(X_train, y_train, nb_epoch=10, batch_size=16, validation_split=0.1, show_accuracy=True, verbose=2)\n",
+    "\n",
+    "print(\"Generating test predictions...\")\n",
+    "preds = model.predict_classes(X_test, verbose=0)\n",
+    "\n",
+    "def write_preds(preds, fname):\n",
+    "    pd.DataFrame({\"ImageId\": list(range(1,len(preds)+1)), \"Label\": preds}).to_csv(fname, index=False, header=True)\n",
+    "\n",
+    "write_preds(preds, \"keras-mlp.csv\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {
+    "collapsed": true
+   },
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.5.1"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 0
+}
